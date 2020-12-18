@@ -3,14 +3,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class FileReader {
 
     private String directoryName; // the data folder (in parent directory already), src/fileIo
-    private String fileName;      // the "day18.txt", "jolts.txt"
-    private String logFileName;   // store any logging info, what went right / wrong
+    private String fileName;      // the "day18.txt", "jolts.txt" //Path you're reading from
+    private String logFileName;   // store any logging info, what went right / wrong   //Path your putting file info into
     private Path directoryPath;   // Path representation of the parent directory for our files
     private Path filePath;        // actual file itself, data/day18.txt
     private Path logFilePath;      // Path representation of the log file // file for reading the file(?)
@@ -52,19 +53,22 @@ public class FileReader {
                 throw new IOException("Unable to create the data file (" + this.fileName + ")!");
             }
         }
-        System.out.println(filePath);
+
         this.fileLines = Files.readAllLines(this.filePath);
     }
 
 
 
-    public void writeToLog(String message) throws IOException {
-        try{
+    public void writeToLog(Contact person) throws IOException {
+        ArrayList<String> List = new ArrayList<>();
+        List.add(person.getName());
+        List.add(person.getNumber());
+    try{
             //write the string message to the log file of This Instance of the File reader object that is instantiated
-            Files.write(this.logFilePath, Arrays.asList(message), StandardOpenOption.APPEND);
+            Files.write(this.logFilePath, List, StandardOpenOption.APPEND);
         }catch(IOException e){
             Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
-            throw new IOException("Unable to write custom message " + message+ " to log file");
+            throw new IOException("Unable to write custom contact " + person + " to log file");
         }
     }
 
