@@ -5,9 +5,15 @@ public class ContactApplication {
 
     public static void main(String[] args) throws IOException {
 
+        Input sc = new Input();
+
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
 
-        contactReader.writeToLog("newContact 1-111-222-3333");
+
+        String newContact = sc.getString("add a contact");
+
+        contactReader.writeToLog(newContact);
+
 
     }
 }
