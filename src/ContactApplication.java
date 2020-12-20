@@ -10,22 +10,26 @@ public class ContactApplication {
 
         Input sc = new Input();
 
-
         boolean notExit = true;
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         List<String> allContacts =  contactReader.getFileLines();
 
         do{
-            displayHomeScreen(sc, allContacts);
+            int choice = displayHomeScreen(sc, allContacts);
             System.out.println(" ");
-            if(displayHomeScreen(sc, allContacts) == 5){
+            if(choice == 5){
                 notExit = false;
             }
         }while(notExit);
         System.out.println("You chose to exit Bye!");
-
-
     }
+
+
+
+
+
+
+
 
     public static void format(String name, String number){
         System.out.println(name + " | " + number);
@@ -48,31 +52,37 @@ public class ContactApplication {
                 viewAllContacts(allContacts);
                 break;
             case 2:
-                addNewContact(sc);
+                addNewContact(sc, allContacts);
                 break;
             case 3:
-                searchByName();
+                searchByName(sc, allContacts);
                 break;
             case 4:
                 deleteContact(sc, allContacts);
                 break;
         }
-        return 5;
+        return option;
     }
 
-    public static void addNewContact(Input sc) throws IOException {
+    public static void addNewContact(Input sc, List<String> allContacts) throws IOException {
         String newContactName = sc.getString("What is this person's name?");
         String newContactNumber = sc.getString("What is this person's number?");
+
+        //TODO: FORMAT THE NUMBER TO (111)-111-1111;
 
         Contact person1 = new Contact(newContactName, newContactNumber);
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         contactReader.writeToLog(person1);
+        allContacts.add(person1.getName());
+        allContacts.add(person1.getNumber());
     }
 
 
 
 
     public static void viewAllContacts(List<String> allContacts) throws IOException {
+
+        // TODO: FORMAT THE OUTPUT
 
         System.out.println(" ");
         System.out.printf("Name      | Phone number |%n--------------------------%n");
@@ -87,10 +97,12 @@ public class ContactApplication {
 
 
 
-    public static void searchByName(){
-        System.out.println("Will display specified contact");
+    public static void searchByName(Input sc, List<String> allContacts){
+        String nameToFind = sc.getString("Who are you looking for? Enter a name");
+        int index = allContacts.indexOf(nameToFind);
+        System.out.println(nameToFind + "'s number is " + allContacts.get(index + 1));
+        // TODO: ADD CONDITIONAL FOR A CONTACT THAT DOES NOT EXIST
     }
-
 
 
 
@@ -98,6 +110,8 @@ public class ContactApplication {
     public static  void deleteContact(Input sc, List<String> allContacts) throws IOException {
         System.out.println("Current contact list: " + allContacts);
         String choice = sc.getString("What contact do you want to delete?");
+
+        //TODO: TRY TO IMPLEMENT A TRY CATCH FOR A NUMBER THAT DOES NOT EXIST
 
 
         int personIndex = allContacts.indexOf(choice);
