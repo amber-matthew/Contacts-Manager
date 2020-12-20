@@ -10,7 +10,7 @@ public class Input {
 
     public String getString(String prompt){
         System.out.println(prompt);
-        return this.sc.nextLine();
+        return this.sc.next();
     }
 
     public int getNumber(String prompt, int min, int max){
