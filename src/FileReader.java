@@ -76,7 +76,7 @@ public class FileReader {
         try{
             Files.write(this.logFilePath, updatedContacts);
         }catch(IOException e){
-            Files.write(this.logFilePath, Arrays.asList(e.getMessage()));
+            Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
             throw new IOException("Unable to delete contact " + deletedContact + " with number " + deletedNumber);
         }
     }

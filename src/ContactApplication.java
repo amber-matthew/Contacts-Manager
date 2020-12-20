@@ -101,19 +101,17 @@ public class ContactApplication {
 
 
         int personIndex = allContacts.indexOf(choice);
-        String personToDelete = allContacts.get(personIndex);
-        System.out.println("You are deleting " + personToDelete);
+        String numberToDelete = allContacts.get(personIndex + 1);
+        System.out.println("You are deleting " + choice + " with number " + numberToDelete + " are you sure?");
         allContacts.remove(personIndex);
 
 
-        String numberToDelete = allContacts.get(personIndex);
-        System.out.println("You are deleting the number " + numberToDelete);
         allContacts.remove(personIndex);
         System.out.println(allContacts);
 
 
-        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
-        contactReader.overwriteLog(allContacts, personToDelete, numberToDelete);
+//        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
+//        contactReader.overwriteLog(allContacts, choice, numberToDelete);
 
 
     }
