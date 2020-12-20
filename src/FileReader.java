@@ -72,6 +72,15 @@ public class FileReader {
         }
     }
 
+    public void overwriteLog(List<String> updatedContacts, String deletedContact, String deletedNumber) throws IOException {
+        try{
+            Files.write(this.logFilePath, updatedContacts);
+        }catch(IOException e){
+            Files.write(this.logFilePath, Arrays.asList(e.getMessage()));
+            throw new IOException("Unable to delete contact " + deletedContact + " with number " + deletedNumber);
+        }
+    }
+
 
 
 
