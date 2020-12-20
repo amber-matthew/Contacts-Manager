@@ -100,8 +100,12 @@ public class ContactApplication {
     public static void searchByName(Input sc, List<String> allContacts){
         String nameToFind = sc.getString("Who are you looking for? Enter a name");
         int index = allContacts.indexOf(nameToFind);
-        System.out.println(nameToFind + "'s number is " + allContacts.get(index + 1));
-        // TODO: ADD CONDITIONAL FOR A CONTACT THAT DOES NOT EXIST
+
+        if(allContacts.contains(nameToFind)){
+            System.out.println(nameToFind + "'s number is " + allContacts.get(index + 1));
+        } else {
+            System.out.println("This contact does not exist");
+        }
     }
 
 
