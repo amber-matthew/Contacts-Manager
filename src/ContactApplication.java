@@ -9,11 +9,13 @@ public class ContactApplication {
     public static void main(String[] args) throws IOException {
 
         Input sc = new Input();
+        Ascii art = new Ascii();
 
         boolean notExit = true;
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         List<String> allContacts =  contactReader.getFileLines();
 
+        art.art2();
         do{
             int choice = displayHomeScreen(sc, allContacts);
             System.out.println(" ");
@@ -32,7 +34,7 @@ public class ContactApplication {
 
 
     public static void format(String name, String number){
-        System.out.printf("|  %-20s|  %-20s|%n",name,number);
+        System.out.printf("\033[0;34m|  %-20s|  %-20s|%n",name,number);
     }
 
 
@@ -124,17 +126,14 @@ public class ContactApplication {
 
     public static void viewAllContacts(List<String> allContacts) throws IOException {
 
-
-
         System.out.println(" ");
         String name = "Name";
         String number = "Number";
 
-
         for(int i = 0; i < 46; i++){
-            System.out.print("#");
+            System.out.print("\033[0;33m#");
         }
-        System.out.printf("%n|  %-20s|  %-20s|%n|", name, number);
+        System.out.printf("%n\033[0;34m|  %-20s|  %-20s|%n|", name, number);
         for(int i = 0; i < 45; i++){
             if(i == 44){
                 System.out.printf("-|%n");
@@ -142,15 +141,12 @@ public class ContactApplication {
             System.out.print("-");
         }
 
-
         for(int i = 0; i < allContacts.size(); i+=2){
             format(allContacts.get(i),allContacts.get(i+1));
         }
         for(int i = 0; i < 46; i++){
-            System.out.print("#");
+            System.out.print("\033[0;33m#\033[0;38m");
         }
-        //System.out.printf("%-40s%n", dash);
-
     }
 
 
@@ -184,16 +180,11 @@ public class ContactApplication {
         String numberToDelete = allContacts.get(personIndex + 1);
         if(sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")){
             allContacts.remove(personIndex);
-
             allContacts.remove(personIndex);
-
-        };
-
-
+        }
 
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         contactReader.overwriteLog(allContacts, choice, numberToDelete);
-
 
     }
 
