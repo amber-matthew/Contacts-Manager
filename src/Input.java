@@ -29,5 +29,11 @@ public class Input {
         return getNumber("Invalid input, please try again", min, max);
     }
 
+    public boolean yesNo(String prompt){
+       String response =  getString(prompt);
+       return response.equalsIgnoreCase("yes");
+
+    }
+
 
 }

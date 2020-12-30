@@ -81,6 +81,15 @@ public class FileReader {
         }
     }
 
+    public void updateLog(List<String> updatedContacts, String oldNumber, String newNumber) throws IOException {
+        try{
+            Files.write(this.logFilePath, updatedContacts);
+        }catch(IOException e){
+            Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
+            throw new IOException("Unable to replace contact " + oldNumber + " with number " + newNumber);
+        }
+    }
+
 
 
 

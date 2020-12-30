@@ -32,7 +32,7 @@ public class ContactApplication {
 
 
     public static void format(String name, String number){
-        System.out.println(name + " | " + number);
+        System.out.printf("|  %-20s|  %-20s|%n",name,number);
     }
 
 
@@ -66,15 +66,37 @@ public class ContactApplication {
 
     public static void addNewContact(Input sc, List<String> allContacts) throws IOException {
         String newContactName = sc.getString("What is this person's name?");
-        String newContactNumber = sc.getString("What is this person's number?");
-
-        //TODO: FORMAT THE NUMBER TO (111)-111-1111;
-
-        Contact person1 = new Contact(newContactName, newContactNumber);
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
-        contactReader.writeToLog(person1);
-        allContacts.add(person1.getName());
-        allContacts.add(person1.getNumber());
+        if (allContacts.contains(newContactName)) {
+            if (sc.yesNo("There is already a contact named " + newContactName + " would you like to override?")) {
+
+                int personIndex = allContacts.indexOf(newContactName);
+                String oldNumber = allContacts.get(personIndex + 1);
+                String newContactNumber = formatPhoneNum(sc.getString("What is " + newContactName + "'s new contact number?"));
+
+
+                allContacts.set(personIndex+1, newContactNumber);
+
+
+                contactReader.updateLog(allContacts, oldNumber, newContactNumber);
+
+
+
+            }else{
+                System.out.println("Re-enter information");
+                addNewContact(sc, allContacts);
+            }
+
+        }else {
+
+            String newContactNumber = formatPhoneNum(sc.getString("What is this person's number?"));
+
+
+            Contact person1 = new Contact(newContactName, newContactNumber);
+            contactReader.writeToLog(person1);
+            allContacts.add(person1.getName());
+            allContacts.add(person1.getNumber());
+        }
     }
 
     public static String formatPhoneNum(String num){
@@ -102,14 +124,32 @@ public class ContactApplication {
 
     public static void viewAllContacts(List<String> allContacts) throws IOException {
 
-        // TODO: FORMAT THE OUTPUT
+
 
         System.out.println(" ");
-        System.out.printf("Name      | Phone number |%n--------------------------%n");
+        String name = "Name";
+        String number = "Number";
+
+
+        for(int i = 0; i < 46; i++){
+            System.out.print("#");
+        }
+        System.out.printf("%n|  %-20s|  %-20s|%n|", name, number);
+        for(int i = 0; i < 45; i++){
+            if(i == 44){
+                System.out.printf("-|%n");
+            }else
+            System.out.print("-");
+        }
+
 
         for(int i = 0; i < allContacts.size(); i+=2){
             format(allContacts.get(i),allContacts.get(i+1));
         }
+        for(int i = 0; i < 46; i++){
+            System.out.print("#");
+        }
+        //System.out.printf("%-40s%n", dash);
 
     }
 
@@ -132,7 +172,9 @@ public class ContactApplication {
 
 
     public static  void deleteContact(Input sc, List<String> allContacts) throws IOException {
-        System.out.println("Current contact list: " + allContacts);
+        System.out.println("Current contact list: ");
+        viewAllContacts(allContacts);
+        System.out.println();
         String choice = sc.getString("What contact do you want to delete?");
 
         //TODO: TRY TO IMPLEMENT A TRY CATCH FOR A NUMBER THAT DOES NOT EXIST
@@ -140,16 +182,17 @@ public class ContactApplication {
 
         int personIndex = allContacts.indexOf(choice);
         String numberToDelete = allContacts.get(personIndex + 1);
-        System.out.println("You are deleting " + choice + " with number " + numberToDelete + " are you sure?");
-        allContacts.remove(personIndex);
+        if(sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")){
+            allContacts.remove(personIndex);
+
+            allContacts.remove(personIndex);
+
+        };
 
 
-        allContacts.remove(personIndex);
-        System.out.println(allContacts);
 
-
-//        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
-//        contactReader.overwriteLog(allContacts, choice, numberToDelete);
+        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
+        contactReader.overwriteLog(allContacts, choice, numberToDelete);
 
 
     }
