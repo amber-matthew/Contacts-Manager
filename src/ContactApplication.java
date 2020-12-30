@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,19 +69,30 @@ public class ContactApplication {
 
     public static void addNewContact(Input sc, List<String> allContacts) throws IOException {
         String newContactName = sc.getString("What is this person's name?");
+
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
+        FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
+
         if (allContacts.contains(newContactName)) {
+            boolean validInput = true;
             if (sc.yesNo("There is already a contact named " + newContactName + " would you like to override?")) {
 
                 int personIndex = allContacts.indexOf(newContactName);
                 String oldNumber = allContacts.get(personIndex + 1);
-                String newContactNumber = formatPhoneNum(sc.getString("What is " + newContactName + "'s new contact number?"));
+                String newContactNumber = sc.getString("What is " + newContactName + "'s new contact number?");
 
+                try{
+                    Integer.parseInt(newContactNumber);
+                } catch (Exception e){
+                    logWriter.writeToLog(newContactNumber+" is not a valid number- "+e.getMessage());
+                    validInput = false;
+                }
 
-                allContacts.set(personIndex+1, newContactNumber);
-
-
-                contactReader.updateLog(allContacts, oldNumber, newContactNumber);
+                if(validInput){
+                    String formattedContactNumber = formatPhoneNum(newContactNumber);
+                    allContacts.set(personIndex + 1, formattedContactNumber);
+                    contactReader.updateLog(allContacts, oldNumber, formattedContactNumber);
+                }
 
 
 
@@ -90,14 +102,25 @@ public class ContactApplication {
             }
 
         }else {
+            boolean isValid = true;
 
-            String newContactNumber = formatPhoneNum(sc.getString("What is this person's number?"));
+            String newContactNumber = sc.getString("What is this person's number?");
+
+            try{
+                Integer.parseInt(newContactNumber);
+            } catch (Exception e){
+                logWriter.writeToLog(newContactNumber+" is not a valid number for contact " +newContactName + " "+e.getMessage());
+                isValid = false;
+            }
 
 
-            Contact person1 = new Contact(newContactName, newContactNumber);
-            contactReader.writeToLog(person1);
-            allContacts.add(person1.getName());
-            allContacts.add(person1.getNumber());
+            if(isValid) {
+                String formattedNewNumber = formatPhoneNum(newContactNumber);
+                Contact person1 = new Contact(newContactName, formattedNewNumber);
+                contactReader.writeToLog(person1);
+                allContacts.add(person1.getName());
+                allContacts.add(person1.getNumber());
+            }
         }
     }
 
@@ -168,24 +191,35 @@ public class ContactApplication {
 
 
     public static  void deleteContact(Input sc, List<String> allContacts) throws IOException {
+        boolean validChoice = true;
         System.out.println("Current contact list: ");
         viewAllContacts(allContacts);
         System.out.println();
         String choice = sc.getString("What contact do you want to delete?");
 
         //TODO: TRY TO IMPLEMENT A TRY CATCH FOR A NUMBER THAT DOES NOT EXIST
-
-
         int personIndex = allContacts.indexOf(choice);
-        String numberToDelete = allContacts.get(personIndex + 1);
-        if(sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")){
-            allContacts.remove(personIndex);
-            allContacts.remove(personIndex);
+
+
+        try{
+            allContacts.get(personIndex);
+
+        } catch (Exception e){
+            FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
+            logWriter.writeToLog("Unable to find contact name: "+choice+"- "+e.getMessage());
+            validChoice = false;
         }
 
-        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
-        contactReader.overwriteLog(allContacts, choice, numberToDelete);
 
+        if(validChoice){
+            String numberToDelete = allContacts.get(personIndex + 1);
+            if (sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")) {
+                allContacts.remove(personIndex);
+                allContacts.remove(personIndex);
+                FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
+                contactReader.overwriteLog(allContacts, choice, numberToDelete);
+            }
+        }
     }
 
 }

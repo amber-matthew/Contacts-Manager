@@ -57,6 +57,15 @@ public class FileReader {
         this.fileLines = Files.readAllLines(this.filePath);
     }
 
+    public void writeToLog(String message) throws IOException {
+        try {
+            Files.write(this.getLogFilePath(), Arrays.asList(message), StandardOpenOption.APPEND);
+        } catch(IOException e) {
+            Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
+            throw new IOException("Unable to write exception message to log file!");
+        }
+    }
+
 
 
     public void writeToLog(Contact person) throws IOException {
