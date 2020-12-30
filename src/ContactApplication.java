@@ -77,6 +77,26 @@ public class ContactApplication {
         allContacts.add(person1.getNumber());
     }
 
+    public static String formatPhoneNum(String num){
+        if(num.length() == 10){
+            return tenFormat(num);
+        } else if(num.length() == 7){
+            return sevenFormat(num);
+        } else if(num.length() == 11){
+            return elevenFormat(num);
+        }
+        return num;
+    }
+    public static String tenFormat(String num){
+        return "("+num.substring(0, 3)+")-"+sevenFormat(num.substring(3));
+    }
+    public static String sevenFormat(String num){
+        return num.substring(0, 3)+"-"+num.substring(3);
+    }
+    public static String elevenFormat(String num){
+        return num.charAt(0)+"-"+tenFormat(num.substring(1));
+    }
+
 
 
 
