@@ -94,16 +94,14 @@ public class ContactApplication {
                     contactReader.updateLog(allContacts, oldNumber, formattedContactNumber);
                 }
 
-
-
             }else{
                 System.out.println("Re-enter information");
                 addNewContact(sc, allContacts);
             }
 
+
         }else {
             boolean isValid = true;
-
             String newContactNumber = sc.getString("What is this person's number?");
 
             try{
@@ -112,7 +110,6 @@ public class ContactApplication {
                 logWriter.writeToLog(newContactNumber+" is not a valid number for contact " +newContactName + " "+e.getMessage());
                 isValid = false;
             }
-
 
             if(isValid) {
                 String formattedNewNumber = formatPhoneNum(newContactNumber);
@@ -180,6 +177,8 @@ public class ContactApplication {
         String nameToFind = sc.getString("Who are you looking for? Enter a name");
         int index = allContacts.indexOf(nameToFind);
 
+        //TODO : for loop for ignore case of each contact to the name to find
+
         if(allContacts.contains(nameToFind)){
             System.out.println(nameToFind + "'s number is " + allContacts.get(index + 1));
         } else {
@@ -197,9 +196,7 @@ public class ContactApplication {
         System.out.println();
         String choice = sc.getString("What contact do you want to delete?");
 
-        //TODO: TRY TO IMPLEMENT A TRY CATCH FOR A NUMBER THAT DOES NOT EXIST
         int personIndex = allContacts.indexOf(choice);
-
 
         try{
             allContacts.get(personIndex);
@@ -208,8 +205,8 @@ public class ContactApplication {
             FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
             logWriter.writeToLog("Unable to find contact name: "+choice+"- "+e.getMessage());
             validChoice = false;
+            System.out.println("No contact found with name " +choice);
         }
-
 
         if(validChoice){
             String numberToDelete = allContacts.get(personIndex + 1);
