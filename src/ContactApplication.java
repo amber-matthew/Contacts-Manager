@@ -80,7 +80,9 @@ public class ContactApplication {
                 int personIndex = allContacts.indexOf(newContactName);
                 String oldNumber = allContacts.get(personIndex + 1);
                 String newContactNumber = sc.getString("What is " + newContactName + "'s new contact number?");
-
+                if(newContactNumber.contains("-")){
+                    newContactNumber = newContactNumber.replaceAll("-", "");
+                }
                 try{
                     Integer.parseInt(newContactNumber);
                 } catch (Exception e){
@@ -103,6 +105,9 @@ public class ContactApplication {
         }else {
             boolean isValid = true;
             String newContactNumber = sc.getString("What is this person's number?");
+            if(newContactNumber.contains("-")){
+                newContactNumber = newContactNumber.replaceAll("-", "");
+            }
 
             try{
                 Integer.parseInt(newContactNumber);
