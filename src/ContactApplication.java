@@ -18,6 +18,8 @@ public class ContactApplication {
 
         art.art2();
         do{
+            System.out.println("TODO: ");
+            System.out.println("NEED TO ADD THE NEXT LINE OPTION TO ALLOW A CONTACT TO BE ADDED WITH A FIRST AND LAST NAME");
             int choice = displayHomeScreen(sc, allContacts);
             System.out.println(" ");
             if(choice == 5){
