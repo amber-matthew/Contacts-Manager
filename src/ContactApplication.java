@@ -2,8 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ContactApplication {
 
@@ -15,10 +14,15 @@ public class ContactApplication {
         boolean notExit = true;
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         List<String> allContacts =  contactReader.getFileLines();
+        HashMap<String, String> contactsList = new HashMap<>();
+
+        for(int i = 0; i < allContacts.size(); i+=2){
+            contactsList.put(allContacts.get(i), allContacts.get(i + 1));
+        }
 
         art.art2();
         do{
-            int choice = displayHomeScreen(sc, allContacts);
+            int choice = displayHomeScreen(sc, contactsList);
             System.out.println(" ");
             if(choice == 5){
                 notExit = false;
@@ -35,7 +39,7 @@ public class ContactApplication {
     }
 
 
-    public static int displayHomeScreen(Input sc, List<String> allContacts) throws IOException {
+    public static int displayHomeScreen(Input sc, HashMap<String, String> allContacts) throws IOException {
         System.out.println("1 - View contacts");
         System.out.println("2 - Add a new contact");
         System.out.println("3 - Search a contact by name");
@@ -45,7 +49,7 @@ public class ContactApplication {
         return runUserOption(sc.getNumber("Enter an option (1, 2, 3, 4, or 5)", 1,5), sc, allContacts);
     }
 
-    public static int runUserOption(int option, Input sc, List<String> allContacts) throws IOException {
+    public static int runUserOption(int option, Input sc, HashMap<String, String> allContacts) throws IOException {
         switch(option){
             case 1:
                 viewAllContacts(allContacts);
@@ -63,19 +67,18 @@ public class ContactApplication {
         return option;
     }
 
-    public static void addNewContact(Input sc, List<String> allContacts) throws IOException {
+    public static void addNewContact(Input sc, HashMap<String, String> allContacts) throws IOException {
         String newContactName = sc.getString("What is this person's name?");
 
 
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
 
-        if (allContacts.contains(newContactName)) {
+        if (allContacts.get(newContactName) != null) {
             boolean validInput = true;
             if (sc.yesNo("There is already a contact named " + newContactName + " would you like to override?")) {
 
-                int personIndex = allContacts.indexOf(newContactName);
-                String oldNumber = allContacts.get(personIndex + 1);
+                String oldNumber = allContacts.get(newContactName);
                 String newContactNumber = sc.getString("What is " + newContactName + "'s new contact number?");
                 if(newContactNumber.contains("-")){
                     newContactNumber = newContactNumber.replaceAll("-", "");
@@ -89,7 +92,7 @@ public class ContactApplication {
 
                 if(validInput){
                     String formattedContactNumber = formatPhoneNum(newContactNumber);
-                    allContacts.set(personIndex + 1, formattedContactNumber);
+                    allContacts.put(newContactName, formattedContactNumber);
                     contactReader.updateLog(allContacts, oldNumber, formattedContactNumber);
                 }
 
@@ -117,8 +120,7 @@ public class ContactApplication {
                 String formattedNewNumber = formatPhoneNum(newContactNumber);
                 Contact person1 = new Contact(newContactName, formattedNewNumber);
                 contactReader.writeToLog(person1);
-                allContacts.add(person1.getName());
-                allContacts.add(person1.getNumber());
+                allContacts.put(person1.getName(), person1.getNumber());
             }
         }
     }
@@ -146,8 +148,7 @@ public class ContactApplication {
 
 
 
-    public static void viewAllContacts(List<String> allContacts) throws IOException {
-
+    public static void viewAllContacts(HashMap<String, String> allContacts) throws IOException {
         System.out.println(" ");
         String name = "Name";
         String number = "Number";
@@ -162,10 +163,24 @@ public class ContactApplication {
             }else
             System.out.print("-");
         }
+        ArrayList<String> toSortContacts = new ArrayList<>();
 
-        for(int i = 0; i < allContacts.size(); i+=2){
-            format(allContacts.get(i),allContacts.get(i+1));
+        for(Map.Entry<String, String> entry : allContacts.entrySet()){
+            StringBuilder contactWithNumber = new StringBuilder();
+            contactWithNumber.append(entry.getKey());
+            contactWithNumber.append("%");
+            contactWithNumber.append(entry.getValue());
+            toSortContacts.add(contactWithNumber.toString());
         }
+
+
+        Collections.sort(toSortContacts);
+
+        for(String contact : toSortContacts){
+            format(contact.split("%")[0], contact.split("%")[1]);
+        }
+
+
         for(int i = 0; i < 46; i++){
             System.out.print("\033[0;33m#\033[0;38m");
         }
@@ -175,40 +190,34 @@ public class ContactApplication {
 
 
 
-    public static void searchByName(Input sc, List<String> allContacts){
+    public static void searchByName(Input sc, HashMap<String, String> allContacts){
         String nameToFind = sc.getString("Who are you looking for? Enter a name");
 
         boolean doesExist = false;
-        for(int i = 0; i < allContacts.size(); i+=2){
-            if(allContacts.get(i).toLowerCase().equals(nameToFind.toLowerCase())){
+        for(Map.Entry<String, String> contact : allContacts.entrySet()){
+            if(contact.getKey().toLowerCase().equals(nameToFind.toLowerCase())){
                 doesExist = true;
-                System.out.println(nameToFind + "'s number is " + allContacts.get(i+1));
+                System.out.println(nameToFind + "'s number is " + contact.getValue());
             }
-
         }
 
         if(!doesExist){
             System.out.println("This contact does not exist.");
         }
-
-
-
     }
 
 
 
 
-    public static  void deleteContact(Input sc, List<String> allContacts) throws IOException {
+    public static  void deleteContact(Input sc, HashMap<String, String> allContacts) throws IOException {
         boolean validChoice = true;
         System.out.println("Current contact list: ");
         viewAllContacts(allContacts);
         System.out.println();
         String choice = sc.getString("What contact do you want to delete?");
 
-        int personIndex = allContacts.indexOf(choice);
-
         try{
-            allContacts.get(personIndex);
+            allContacts.get(choice);
 
         } catch (Exception e){
             FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -218,10 +227,9 @@ public class ContactApplication {
         }
 
         if(validChoice){
-            String numberToDelete = allContacts.get(personIndex + 1);
+            String numberToDelete = allContacts.get(choice);
             if (sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")) {
-                allContacts.remove(personIndex);
-                allContacts.remove(personIndex);
+                allContacts.remove(choice);
                 FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
                 contactReader.overwriteLog(allContacts, choice, numberToDelete);
             }

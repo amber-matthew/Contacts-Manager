@@ -3,9 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class FileReader {
 
@@ -81,18 +79,28 @@ public class FileReader {
         }
     }
 
-    public void overwriteLog(List<String> updatedContacts, String deletedContact, String deletedNumber) throws IOException {
+    public void overwriteLog(HashMap<String, String> updatedContacts, String deletedContact, String deletedNumber) throws IOException {
+        List<String> contacts = new ArrayList<>();
+        for(Map.Entry<String, String> entry: updatedContacts.entrySet()){
+            contacts.add(entry.getKey());
+            contacts.add(entry.getValue());
+        }
         try{
-            Files.write(this.logFilePath, updatedContacts);
+            Files.write(this.logFilePath, contacts);
         }catch(IOException e){
             Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
             throw new IOException("Unable to delete contact " + deletedContact + " with number " + deletedNumber);
         }
     }
 
-    public void updateLog(List<String> updatedContacts, String oldNumber, String newNumber) throws IOException {
+    public void updateLog(HashMap<String, String> updatedContacts, String oldNumber, String newNumber) throws IOException {
+        List<String> contacts = new ArrayList<>();
+        for(Map.Entry<String, String> entry: updatedContacts.entrySet()){
+            contacts.add(entry.getKey());
+            contacts.add(entry.getValue());
+        }
         try{
-            Files.write(this.logFilePath, updatedContacts);
+            Files.write(this.logFilePath, contacts);
         }catch(IOException e){
             Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
             throw new IOException("Unable to replace contact " + oldNumber + " with number " + newNumber);
