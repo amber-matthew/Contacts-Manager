@@ -93,6 +93,7 @@ public class FileReader {
         }
     }
 
+
     public void updateLog(HashMap<String, String> updatedContacts, String oldNumber, String newNumber) throws IOException {
         List<String> contacts = new ArrayList<>();
         for(Map.Entry<String, String> entry: updatedContacts.entrySet()){
@@ -106,7 +107,6 @@ public class FileReader {
             throw new IOException("Unable to replace contact " + oldNumber + " with number " + newNumber);
         }
     }
-
 
 
 

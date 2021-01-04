@@ -1,3 +1,4 @@
+import javax.swing.plaf.IconUIResource;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -53,7 +54,7 @@ public class ContactApplication {
                 viewAllContacts(allContacts);
                 break;
             case 2:
-                addNewContact(sc, allContacts);
+                addNewContact(sc, allContacts, contactList);
                 break;
             case 3:
                 searchByName(sc, allContacts);
@@ -65,19 +66,9 @@ public class ContactApplication {
         return option;
     }
 
-    public static void addNewContact(Input sc, HashMap<String, String> allContacts) throws IOException {
+    public static void addNewContact(Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
         String inputName = sc.getString("What is this person's name?");
-        String[] names = inputName.split(" ");
-        String lastL = "";
-        String restOfLastName = "";
-        if(names.length > 1){
-            lastL = names[1].substring(0, 1).toUpperCase();
-            restOfLastName = names[1].substring(1).toLowerCase();
-        }
-        String firstL = names[0].substring(0, 1).toUpperCase();
-        String restOfFirstName = names[0].substring(1).toLowerCase();
-
-        String newContactName = firstL+restOfFirstName+" "+lastL+restOfLastName;
+        String newContactName = firstLastCap(inputName);
 
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -101,11 +92,13 @@ public class ContactApplication {
                 if(validInput){
                     String formattedContactNumber = formatPhoneNum(newContactNumber);
                     allContacts.put(newContactName, formattedContactNumber);
+                    contactList.add(newContactName);
+                    contactList.add(formattedContactNumber);
                     contactReader.updateLog(allContacts, oldNumber, formattedContactNumber);
                 }
             }else{
                 System.out.println("Re-enter information");
-                addNewContact(sc, allContacts);
+                addNewContact(sc, allContacts, contactList);
             }
 
         }else {
@@ -126,6 +119,8 @@ public class ContactApplication {
                 String formattedNewNumber = formatPhoneNum(newContactNumber);
                 Contact person1 = new Contact(newContactName, formattedNewNumber);
                 contactReader.writeToLog(person1);
+                contactList.add(newContactName);
+                contactList.add(formattedNewNumber);
                 allContacts.put(person1.getName(), person1.getNumber());
             }
         }
@@ -196,16 +191,7 @@ public class ContactApplication {
 
     public static void searchByName(Input sc, HashMap<String, String> allContacts){
         String inputName = sc.getString("Who are you looking for? Enter a name");
-        String[] nameArr = inputName.split(" ");
-        String nameFirstL = nameArr[0].substring(0, 1).toUpperCase();
-        String rest = nameArr[0].substring(1).toLowerCase();
-        String nameLastL = "";
-        String lastRest = "";
-        if(nameArr.length > 1){
-            nameLastL = nameArr[1].substring(0, 1).toUpperCase();
-            lastRest = nameArr[1].substring(1).toLowerCase();
-        }
-        String nameToFind = nameFirstL+rest+" "+nameLastL+lastRest;
+        String nameToFind = firstLastCap(inputName);
 
         boolean doesExist = false;
         for(Map.Entry<String, String> contact : allContacts.entrySet()){
@@ -224,15 +210,39 @@ public class ContactApplication {
 
 
     public static  void deleteContact(Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
+
         boolean validChoice = true;
         System.out.println("Current contact list: ");
         viewAllContacts(allContacts);
         System.out.println();
-        String choice = sc.getString("What contact do you want to delete?");
+
+        // ====== LOWER CASE THE INPUT FOR WHO THEY WANT TO DELETE
+        String choice = sc.getString("What contact do you want to delete?").toLowerCase();
+        // LOWERCASE ALL THE CONTACTS FROM THE TEXT FILE => TRY CATCH => IF NOT BOTH IN LOWER CASE, THE VALUE WILL NEVER BE FOUND EVEN IF IT DOES EXIST
+        contactList.replaceAll(ContactName -> ContactName.toLowerCase().trim()); // FOR EVERY CONTACT, LOWERCASE THEM ALL AND PUT THEM BACK IN THE CONTACT LIST FOR THE TRY CATCH
+
+        //ALL OF THIS WAS DONE SO THE FIRST NAME, LAST NAME VARIABLES CAN BE PASSED IN AS THE CONTACT TO BE REMOVED FROM THE CONTACTS.TXT FILE => {
+        String[] nameToDeleteArr = choice.split(" ");
+        String lastL = "";
+        String restOfLast = "";
+        if (nameToDeleteArr.length > 1) {
+            lastL = nameToDeleteArr[1].substring(0, 1).toUpperCase();
+            restOfLast = nameToDeleteArr[1].substring(1).toLowerCase();
+        }
+        String firstL = nameToDeleteArr[0].substring(0, 1).toUpperCase();
+        String restOfFirst = nameToDeleteArr[0].substring(1).toLowerCase();
+
+        // THE NAMES IN THE HASH MAP CONTACTS TEXT FILE ARE FORMATTED IN A VERY SPECIFIC
+        String firstName = firstL + restOfFirst;
+        String lastName = lastL + restOfLast;
+    //}
+
+
+
 
         try{
-            int index = contactList.indexOf(choice);
-            contactList.get(index);
+            int index = contactList.indexOf(choice); // POTENTIALLY FIND A VALUE THAT DOES NOT EXIST IN THE CONTACT LIST ARRAY
+            contactList.get(index); // IF THAT CHOICE'S INDEX IS NOT THERE, THE INT INDEX WILL BE -1 => CONTACT LIST .GET OF A -1 INDEX WILL SET THE ERROR
 
         } catch (Exception e){
             FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -242,13 +252,30 @@ public class ContactApplication {
         }
 
         if(validChoice){
-            String numberToDelete = allContacts.get(choice);
-            if (sc.yesNo("You are deleting " + choice + " with number " + numberToDelete + " are you sure?")) {
-                allContacts.remove(choice);
+            String numberToDelete = ""; // SET TO EMPTY STRING UNTIL THE NAME THEY ARE LOOKING FOR IS FOUND TO THEN SET THIS TO THAT SPECIFIC PERSON'S NUMBER
+            for(Map.Entry<String, String> person : allContacts.entrySet()) { // LOOP THROUGH THE HASH MAP/CONTACTS.TXT TO FIND IF THE NAME HASH MAP
+                if(choice.equals(person.getKey().toLowerCase().trim())){ // CHECK IF IT IS EQUAL TO ANY NAMES IN THE LIST ALSO LOWER CASED
+                    numberToDelete = person.getValue(); // RE ASSIGN THE VALUE OF THE NUMBER TO THAT "PERSON"(KEY) TO THE "PERSON"'S NUMBER(VALUE)
+                }
+            }
+            if (sc.yesNo("You are deleting " + firstLastCap(choice) + " with number " + numberToDelete + " are you sure?")) {
+                allContacts.remove(formatName(firstName, lastName));
                 FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
                 contactReader.overwriteLog(allContacts, choice, numberToDelete);
             }
         }
+    }
+
+    public static String formatName(String first, String last){
+        return first + " " + last;
+    }
+
+    public static String firstLastCap(String input){
+        String[] names = input.split(" ");
+        if(names.length > 1) {
+            return names[0].substring(0, 1).toUpperCase() + names[0].substring(1).toLowerCase() + " " + names[1].substring(0, 1).toUpperCase() + names[1].substring(1).toLowerCase();
+        }
+        return names[0].substring(0, 1).toUpperCase() + names[0].substring(1).toLowerCase() + " ";
     }
 
 }
