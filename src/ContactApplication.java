@@ -68,9 +68,15 @@ public class ContactApplication {
     }
 
     public static void addNewContact(Input sc, HashMap<String, String> allContacts) throws IOException {
-        String newContactName = sc.getString("What is this person's name?");
+        String inputName = sc.getString("What is this person's name?");
+        String[] names = inputName.split(" ");
+        String firstL = names[0].substring(0, 1).toUpperCase();
+        String restOfFirstName = names[0].substring(1);
 
+        String lastL = names[1].substring(0, 1).toUpperCase();
+        String restOfLastName = names[1].substring(1);
 
+        String newContactName = firstL+restOfFirstName+" "+lastL+restOfLastName;
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
 
