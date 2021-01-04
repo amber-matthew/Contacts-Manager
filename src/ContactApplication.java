@@ -196,9 +196,16 @@ public class ContactApplication {
 
     public static void searchByName(Input sc, HashMap<String, String> allContacts){
         String inputName = sc.getString("Who are you looking for? Enter a name");
-        String nameFirstL = inputName.substring(0, 1).toUpperCase();
-        String rest = inputName.substring(1).toLowerCase();
-        String nameToFind = nameFirstL+rest;
+        String[] nameArr = inputName.split(" ");
+        String nameFirstL = nameArr[0].substring(0, 1).toUpperCase();
+        String rest = nameArr[0].substring(1).toLowerCase();
+        String nameLastL = "";
+        String lastRest = "";
+        if(nameArr.length > 1){
+            nameLastL = nameArr[1].substring(0, 1).toUpperCase();
+            lastRest = nameArr[1].substring(1).toLowerCase();
+        }
+        String nameToFind = nameFirstL+rest+" "+nameLastL+lastRest;
 
         boolean doesExist = false;
         for(Map.Entry<String, String> contact : allContacts.entrySet()){
