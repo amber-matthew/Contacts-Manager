@@ -207,12 +207,9 @@ public class ContactApplication {
         viewAllContacts(allContacts, contactReader);
         System.out.println();
 
-        // ====== LOWER CASE THE INPUT FOR WHO THEY WANT TO DELETE
         String choice = sc.getString("What contact do you want to delete?").toLowerCase();
-        // LOWERCASE ALL THE CONTACTS FROM THE TEXT FILE => TRY CATCH => IF NOT BOTH IN LOWER CASE, THE VALUE WILL NEVER BE FOUND EVEN IF IT DOES EXIST
-        contactList.replaceAll(ContactName -> ContactName.toLowerCase().trim()); // FOR EVERY CONTACT, LOWERCASE THEM ALL AND PUT THEM BACK IN THE CONTACT LIST FOR THE TRY CATCH
+        contactList.replaceAll(ContactName -> ContactName.toLowerCase().trim());
 
-        //ALL OF THIS WAS DONE SO THE FIRST NAME, LAST NAME VARIABLES CAN BE PASSED IN AS THE CONTACT TO BE REMOVED FROM THE CONTACTS.TXT FILE => {
         String[] nameToDeleteArr = choice.split(" ");
         String lastL = "";
         String restOfLast = "";
@@ -223,17 +220,13 @@ public class ContactApplication {
         String firstL = nameToDeleteArr[0].substring(0, 1).toUpperCase();
         String restOfFirst = nameToDeleteArr[0].substring(1).toLowerCase();
 
-        // THE NAMES IN THE HASH MAP CONTACTS TEXT FILE ARE FORMATTED IN A VERY SPECIFIC
         String firstName = firstL + restOfFirst;
         String lastName = lastL + restOfLast;
-    //}
-
-
 
 
         try{
-            int index = contactList.indexOf(choice); // POTENTIALLY FIND A VALUE THAT DOES NOT EXIST IN THE CONTACT LIST ARRAY
-            contactList.get(index); // IF THAT CHOICE'S INDEX IS NOT THERE, THE INT INDEX WILL BE -1 => CONTACT LIST .GET OF A -1 INDEX WILL SET THE ERROR
+            int index = contactList.indexOf(choice);
+            contactList.get(index);
 
         } catch (Exception e){
             FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -243,10 +236,10 @@ public class ContactApplication {
         }
 
         if(validChoice){
-            String numberToDelete = ""; // SET TO EMPTY STRING UNTIL THE NAME THEY ARE LOOKING FOR IS FOUND TO THEN SET THIS TO THAT SPECIFIC PERSON'S NUMBER
-            for(Map.Entry<String, String> person : allContacts.entrySet()) { // LOOP THROUGH THE HASH MAP/CONTACTS.TXT TO FIND IF THE NAME HASH MAP
-                if(choice.equals(person.getKey().toLowerCase().trim())){ // CHECK IF IT IS EQUAL TO ANY NAMES IN THE LIST ALSO LOWER CASED
-                    numberToDelete = person.getValue(); // RE ASSIGN THE VALUE OF THE NUMBER TO THAT "PERSON"(KEY) TO THE "PERSON"'S NUMBER(VALUE)
+            String numberToDelete = "";
+            for(Map.Entry<String, String> person : allContacts.entrySet()) {
+                if(choice.equals(person.getKey().toLowerCase().trim())){
+                    numberToDelete = person.getValue();
                 }
             }
             if (sc.yesNo("You are deleting " + firstLastCap(choice) + " with number " + numberToDelete + " are you sure?")) {
