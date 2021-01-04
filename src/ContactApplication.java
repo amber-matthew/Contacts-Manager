@@ -32,8 +32,6 @@ public class ContactApplication {
     }
 
 
-
-
     public static void format(String name, String number){
         System.out.printf("\033[0;34m|  %-20s|  %-20s|%n",name,number);
     }
@@ -70,15 +68,16 @@ public class ContactApplication {
     public static void addNewContact(Input sc, HashMap<String, String> allContacts) throws IOException {
         String inputName = sc.getString("What is this person's name?");
         String[] names = inputName.split(" ");
-        String lastL = names[1].substring(0, 1).toUpperCase();
-        String restOfLastName = names[1].substring(1).toLowerCase();
+        String lastL = "";
+        String restOfLastName = "";
+        if(names.length > 1){
+            lastL = names[1].substring(0, 1).toUpperCase();
+            restOfLastName = names[1].substring(1).toLowerCase();
+        }
         String firstL = names[0].substring(0, 1).toUpperCase();
         String restOfFirstName = names[0].substring(1).toLowerCase();
 
         String newContactName = firstL+restOfFirstName+" "+lastL+restOfLastName;
-
-
-
 
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -104,12 +103,10 @@ public class ContactApplication {
                     allContacts.put(newContactName, formattedContactNumber);
                     contactReader.updateLog(allContacts, oldNumber, formattedContactNumber);
                 }
-
             }else{
                 System.out.println("Re-enter information");
                 addNewContact(sc, allContacts);
             }
-
 
         }else {
             boolean isValid = true;
@@ -182,13 +179,11 @@ public class ContactApplication {
             toSortContacts.add(contactWithNumber.toString());
         }
 
-
         Collections.sort(toSortContacts);
 
         for(String contact : toSortContacts){
             format(contact.split("%")[0], contact.split("%")[1]);
         }
-
 
         for(int i = 0; i < 46; i++){
             System.out.print("\033[0;33m#\033[0;38m");
@@ -200,11 +195,14 @@ public class ContactApplication {
 
 
     public static void searchByName(Input sc, HashMap<String, String> allContacts){
-        String nameToFind = sc.getString("Who are you looking for? Enter a name");
+        String inputName = sc.getString("Who are you looking for? Enter a name");
+        String nameFirstL = inputName.substring(0, 1).toUpperCase();
+        String rest = inputName.substring(1).toLowerCase();
+        String nameToFind = nameFirstL+rest;
 
         boolean doesExist = false;
         for(Map.Entry<String, String> contact : allContacts.entrySet()){
-            if(contact.getKey().toLowerCase().equals(nameToFind.toLowerCase())){
+            if(contact.getKey().toLowerCase().trim().equals(nameToFind.toLowerCase().trim())){
                 doesExist = true;
                 System.out.println(nameToFind + "'s number is " + contact.getValue());
             }
