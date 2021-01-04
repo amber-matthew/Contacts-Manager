@@ -2,3 +2,6 @@
 Unable to find contact name: asdf- Index -1 out of bounds for length 16
 Unable to find contact name: asdgasdg- Index -1 out of bounds for length 16
 210-000-9900 is not a valid number for contact adam For input string: "210-000-9900"
+493423433443 is not a valid number for contact  For input string: "493423433443"
+ is not a valid number for contact ash smith For input string: ""
+5656565656565 is not a valid number for contact ashley lee For input string: "5656565656565"

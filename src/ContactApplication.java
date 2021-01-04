@@ -18,8 +18,6 @@ public class ContactApplication {
 
         art.art2();
         do{
-            System.out.println("TODO: ");
-            System.out.println("NEED TO ADD THE NEXT LINE OPTION TO ALLOW A CONTACT TO BE ADDED WITH A FIRST AND LAST NAME");
             int choice = displayHomeScreen(sc, allContacts);
             System.out.println(" ");
             if(choice == 5){
@@ -28,10 +26,6 @@ public class ContactApplication {
         }while(notExit);
         System.out.println("You chose to exit Bye!");
     }
-
-
-
-
 
 
 
@@ -72,6 +66,7 @@ public class ContactApplication {
     public static void addNewContact(Input sc, List<String> allContacts) throws IOException {
         String newContactName = sc.getString("What is this person's name?");
 
+
         FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
 
@@ -86,7 +81,7 @@ public class ContactApplication {
                     newContactNumber = newContactNumber.replaceAll("-", "");
                 }
                 try{
-                    Integer.parseInt(newContactNumber);
+                    Long.parseLong(newContactNumber);
                 } catch (Exception e){
                     logWriter.writeToLog(newContactNumber+" is not a valid number- "+e.getMessage());
                     validInput = false;
@@ -112,7 +107,7 @@ public class ContactApplication {
             }
 
             try{
-                Integer.parseInt(newContactNumber);
+                Long.parseLong(newContactNumber);
             } catch (Exception e){
                 logWriter.writeToLog(newContactNumber+" is not a valid number for contact " +newContactName + " "+e.getMessage());
                 isValid = false;
@@ -182,15 +177,22 @@ public class ContactApplication {
 
     public static void searchByName(Input sc, List<String> allContacts){
         String nameToFind = sc.getString("Who are you looking for? Enter a name");
-        int index = allContacts.indexOf(nameToFind);
 
-        //TODO : for loop for ignore case of each contact to the name to find
+        boolean doesExist = false;
+        for(int i = 0; i < allContacts.size(); i+=2){
+            if(allContacts.get(i).toLowerCase().equals(nameToFind.toLowerCase())){
+                doesExist = true;
+                System.out.println(nameToFind + "'s number is " + allContacts.get(i+1));
+            }
 
-        if(allContacts.contains(nameToFind)){
-            System.out.println(nameToFind + "'s number is " + allContacts.get(index + 1));
-        } else {
-            System.out.println("This contact does not exist");
         }
+
+        if(!doesExist){
+            System.out.println("This contact does not exist.");
+        }
+
+
+
     }
 
 
