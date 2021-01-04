@@ -1,3 +1,4 @@
+import javax.annotation.processing.Filer;
 import javax.swing.plaf.IconUIResource;
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class ContactApplication {
 
         art.art2();
         do{
-            int choice = displayHomeScreen(sc, contactsList, allContacts);
+            int choice = displayHomeScreen(sc, contactsList, allContacts, contactReader);
             System.out.println(" ");
             if(choice == 5){
                 notExit = false;
@@ -38,39 +39,38 @@ public class ContactApplication {
     }
 
 
-    public static int displayHomeScreen(Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
+    public static int displayHomeScreen(Input sc, HashMap<String, String> allContacts, List<String> contactList, FileReader contactReader) throws IOException {
         System.out.println("1 - View contacts");
         System.out.println("2 - Add a new contact");
         System.out.println("3 - Search a contact by name");
         System.out.println("4 - Delete an existing contact");
         System.out.println("5 - Exit");
 
-        return runUserOption(sc.getNumber("Enter an option (1, 2, 3, 4, or 5)", 1,5), sc, allContacts, contactList);
+        return runUserOption(sc.getNumber("Enter an option (1, 2, 3, 4, or 5)", 1,5), sc, allContacts, contactList, contactReader);
     }
 
-    public static int runUserOption(int option, Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
+    public static int runUserOption(int option, Input sc, HashMap<String, String> allContacts, List<String> contactList, FileReader contactReader) throws IOException {
         switch(option){
             case 1:
-                viewAllContacts(allContacts);
+                viewAllContacts(allContacts, contactReader);
                 break;
             case 2:
-                addNewContact(sc, allContacts, contactList);
+                addNewContact(sc, allContacts, contactList, contactReader);
                 break;
             case 3:
                 searchByName(sc, allContacts);
                 break;
             case 4:
-                deleteContact(sc, allContacts, contactList);
+                deleteContact(sc, allContacts, contactList, contactReader);
                 break;
         }
         return option;
     }
 
-    public static void addNewContact(Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
+    public static void addNewContact(Input sc, HashMap<String, String> allContacts, List<String> contactList, FileReader contactReader) throws IOException {
         String inputName = sc.getString("What is this person's name?");
         String newContactName = firstLastCap(inputName);
 
-        FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
         FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
 
         if (allContacts.get(newContactName) != null) {
@@ -98,7 +98,7 @@ public class ContactApplication {
                 }
             }else{
                 System.out.println("Re-enter information");
-                addNewContact(sc, allContacts, contactList);
+                addNewContact(sc, allContacts, contactList, contactReader);
             }
 
         }else {
@@ -118,10 +118,10 @@ public class ContactApplication {
             if(isValid) {
                 String formattedNewNumber = formatPhoneNum(newContactNumber);
                 Contact person1 = new Contact(newContactName, formattedNewNumber);
-                contactReader.writeToLog(person1);
                 contactList.add(newContactName);
                 contactList.add(formattedNewNumber);
                 allContacts.put(person1.getName(), person1.getNumber());
+                contactReader.overwriteLog(allContacts, "Unable to add new contact");
             }
         }
     }
@@ -149,7 +149,7 @@ public class ContactApplication {
 
 
 
-    public static void viewAllContacts(HashMap<String, String> allContacts) throws IOException {
+    public static void viewAllContacts(HashMap<String, String> allContacts, FileReader contactReader) throws IOException {
         System.out.println(" ");
         String name = "Name";
         String number = "Number";
@@ -164,20 +164,11 @@ public class ContactApplication {
             }else
             System.out.print("-");
         }
-        ArrayList<String> toSortContacts = new ArrayList<>();
 
-        for(Map.Entry<String, String> entry : allContacts.entrySet()){
-            StringBuilder contactWithNumber = new StringBuilder();
-            contactWithNumber.append(entry.getKey());
-            contactWithNumber.append("%");
-            contactWithNumber.append(entry.getValue());
-            toSortContacts.add(contactWithNumber.toString());
-        }
+        List<String> displaySortedContacts = contactReader.storeDataAsSorted(allContacts);
 
-        Collections.sort(toSortContacts);
-
-        for(String contact : toSortContacts){
-            format(contact.split("%")[0], contact.split("%")[1]);
+        for(int i = 0; i < displaySortedContacts.size(); i+=2){
+            format(displaySortedContacts.get(i), displaySortedContacts.get(i + 1));
         }
 
         for(int i = 0; i < 46; i++){
@@ -209,19 +200,16 @@ public class ContactApplication {
 
 
 
-    public static  void deleteContact(Input sc, HashMap<String, String> allContacts, List<String> contactList) throws IOException {
+    public static  void deleteContact(Input sc, HashMap<String, String> allContacts, List<String> contactList, FileReader contactReader) throws IOException {
 
         boolean validChoice = true;
         System.out.println("Current contact list: ");
-        viewAllContacts(allContacts);
+        viewAllContacts(allContacts, contactReader);
         System.out.println();
 
-        // ====== LOWER CASE THE INPUT FOR WHO THEY WANT TO DELETE
         String choice = sc.getString("What contact do you want to delete?").toLowerCase();
-        // LOWERCASE ALL THE CONTACTS FROM THE TEXT FILE => TRY CATCH => IF NOT BOTH IN LOWER CASE, THE VALUE WILL NEVER BE FOUND EVEN IF IT DOES EXIST
-        contactList.replaceAll(ContactName -> ContactName.toLowerCase().trim()); // FOR EVERY CONTACT, LOWERCASE THEM ALL AND PUT THEM BACK IN THE CONTACT LIST FOR THE TRY CATCH
+        contactList.replaceAll(ContactName -> ContactName.toLowerCase().trim());
 
-        //ALL OF THIS WAS DONE SO THE FIRST NAME, LAST NAME VARIABLES CAN BE PASSED IN AS THE CONTACT TO BE REMOVED FROM THE CONTACTS.TXT FILE => {
         String[] nameToDeleteArr = choice.split(" ");
         String lastL = "";
         String restOfLast = "";
@@ -232,17 +220,13 @@ public class ContactApplication {
         String firstL = nameToDeleteArr[0].substring(0, 1).toUpperCase();
         String restOfFirst = nameToDeleteArr[0].substring(1).toLowerCase();
 
-        // THE NAMES IN THE HASH MAP CONTACTS TEXT FILE ARE FORMATTED IN A VERY SPECIFIC
         String firstName = firstL + restOfFirst;
         String lastName = lastL + restOfLast;
-    //}
-
-
 
 
         try{
-            int index = contactList.indexOf(choice); // POTENTIALLY FIND A VALUE THAT DOES NOT EXIST IN THE CONTACT LIST ARRAY
-            contactList.get(index); // IF THAT CHOICE'S INDEX IS NOT THERE, THE INT INDEX WILL BE -1 => CONTACT LIST .GET OF A -1 INDEX WILL SET THE ERROR
+            int index = contactList.indexOf(choice);
+            contactList.get(index);
 
         } catch (Exception e){
             FileReader logWriter = new FileReader("src", "contacts.log", "contacts.log");
@@ -252,15 +236,14 @@ public class ContactApplication {
         }
 
         if(validChoice){
-            String numberToDelete = ""; // SET TO EMPTY STRING UNTIL THE NAME THEY ARE LOOKING FOR IS FOUND TO THEN SET THIS TO THAT SPECIFIC PERSON'S NUMBER
-            for(Map.Entry<String, String> person : allContacts.entrySet()) { // LOOP THROUGH THE HASH MAP/CONTACTS.TXT TO FIND IF THE NAME HASH MAP
-                if(choice.equals(person.getKey().toLowerCase().trim())){ // CHECK IF IT IS EQUAL TO ANY NAMES IN THE LIST ALSO LOWER CASED
-                    numberToDelete = person.getValue(); // RE ASSIGN THE VALUE OF THE NUMBER TO THAT "PERSON"(KEY) TO THE "PERSON"'S NUMBER(VALUE)
+            String numberToDelete = "";
+            for(Map.Entry<String, String> person : allContacts.entrySet()) {
+                if(choice.equals(person.getKey().toLowerCase().trim())){
+                    numberToDelete = person.getValue();
                 }
             }
             if (sc.yesNo("You are deleting " + firstLastCap(choice) + " with number " + numberToDelete + " are you sure?")) {
                 allContacts.remove(formatName(firstName, lastName));
-                FileReader contactReader = new FileReader("src", "contacts.txt", "contacts.txt");
                 contactReader.overwriteLog(allContacts, choice, numberToDelete);
             }
         }

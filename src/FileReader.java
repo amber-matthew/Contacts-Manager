@@ -80,32 +80,48 @@ public class FileReader {
     }
 
     public void overwriteLog(HashMap<String, String> updatedContacts, String deletedContact, String deletedNumber) throws IOException {
-        List<String> contacts = new ArrayList<>();
-        for(Map.Entry<String, String> entry: updatedContacts.entrySet()){
-            contacts.add(entry.getKey());
-            contacts.add(entry.getValue());
-        }
         try{
-            Files.write(this.logFilePath, contacts);
+            Files.write(this.logFilePath, storeDataAsSorted(updatedContacts));
         }catch(IOException e){
             Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
             throw new IOException("Unable to delete contact " + deletedContact + " with number " + deletedNumber);
         }
     }
+    public void overwriteLog(HashMap<String, String> updatedContacts, String message) throws IOException {
+        try{
+            Files.write(this.logFilePath, storeDataAsSorted(updatedContacts));
+        }catch(IOException e){
+            Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
+            throw new IOException(message);
+        }
+    }
 
 
     public void updateLog(HashMap<String, String> updatedContacts, String oldNumber, String newNumber) throws IOException {
-        List<String> contacts = new ArrayList<>();
-        for(Map.Entry<String, String> entry: updatedContacts.entrySet()){
-            contacts.add(entry.getKey());
-            contacts.add(entry.getValue());
-        }
         try{
-            Files.write(this.logFilePath, contacts);
+            Files.write(this.logFilePath, storeDataAsSorted(updatedContacts));
         }catch(IOException e){
             Files.write(this.logFilePath, Arrays.asList(e.getMessage()), StandardOpenOption.APPEND);
             throw new IOException("Unable to replace contact " + oldNumber + " with number " + newNumber);
         }
+    }
+
+    public List<String> storeDataAsSorted(HashMap<String, String> contactsMap){
+        List<String> contacts = new ArrayList<>();
+        for(Map.Entry<String, String> entry: contactsMap.entrySet()){
+            StringBuilder build = new StringBuilder();
+            build.append(entry.getKey());
+            build.append("%");
+            build.append(entry.getValue());
+            contacts.add(build.toString());
+        }
+        Collections.sort(contacts);
+        List<String> sortedContactsToWrite = new ArrayList<>();
+        for(String value : contacts){
+            sortedContactsToWrite.add(value.split("%")[0]);
+            sortedContactsToWrite.add(value.split("%")[1]);
+        }
+        return sortedContactsToWrite;
     }
 
 
